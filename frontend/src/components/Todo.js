@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
-
 const BASE_URL = "http://localhost:5000/api";
 
 function Todo() {
@@ -15,7 +16,7 @@ function Todo() {
         async function fetch() {
             const list = await axios.get(BASE_URL + '/todos')
             setTodoList(list.data)
-            setLastPos(list.data.length)
+            setLastPos(list.data.length + 1)
         }
         fetch()
     }, [])
@@ -26,7 +27,7 @@ function Todo() {
     let addTodo = async () => {
         try {
             const newTodo = await axios.post(BASE_URL + '/todos', { title, link, position: lastPos })
-            setTodoList(todoList => [newTodo.data, ...todoList])
+            setTodoList(newTodo.data)
         } catch (error) {
             alert("enter all details")
         }
@@ -77,14 +78,15 @@ function Todo() {
                 <div className="flex justify-center">
                     <ul className="p-6 divide-y divide-slate-200">
                         {todoList.map((item, index) => {
-                            return (<li className=" flex py-3 hover:bg-slate-100 p-10 cursor-move" key={index} draggable
+                            return (<li className=" flex py-3 hover:bg-slate-100 p-10 cursor-move items-center " key={index} draggable
                                 onDragStart={(e) => setPrePosition(item.position)}
                                 onDragEnter={(e) => setCurPosition(todoList[index].position)}
                                 onDragEnd={(e) => dragDrop(item._id)}
+                                onDragOver={(e) => e.preventDefault()}>
 
+                                <FontAwesomeIcon icon={faBars} className='mr-4' />
 
-                            >
-                                <input type="checkbox" value={!item.isCompleted} defaultChecked={item.isCompleted} onChange={(e) => {
+                                <input type="checkbox" value={!item.isCompleted} defaultChecked={item.isCompleted} checked={item.isCompleted} onChange={(e) => {
                                     item.isCompleted = !item.isCompleted
                                     deleteTodo(item._id, item.isCompleted)
                                 }} />
@@ -100,6 +102,8 @@ function Todo() {
                                     </div>
 
                                 }
+
+
                             </li>)
                         }
 

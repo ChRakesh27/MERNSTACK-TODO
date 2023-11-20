@@ -22,8 +22,9 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const obj = req.body;
-        const doc = await todo.create(obj)
-        res.status(StatusCodes.CREATED).send(doc);
+        await todo.create(obj)
+        const docs = await todo.find().sort({ position: -1 })
+        res.send(docs);
     } catch (error) {
         handleError(res, error);
     }
