@@ -11,7 +11,7 @@ function handleError(res, error) {
 router.get('/', async (req, res) => {
 
     try {
-        const docs = await todo.find().sort({ position: 1 })
+        const docs = await todo.find().sort({ position: -1 })
         res.send(docs);
     } catch (error) {
         handleError(res, error);
@@ -33,15 +33,15 @@ router.patch('/:id', async (req, res) => {
     try {
         const { prePosition, curPosition } = req.body;
         const id = req.params.id
-        const shift = await todo.findByIdAndUpdate(id, { $set: { position: curPosition } })
+        await todo.findByIdAndUpdate(id, { $set: { position: curPosition } })
         if (prePosition > curPosition) {
-            const incre = await todo.updateMany({ position: { $lt: prePosition, $gte: curPosition }, _id: { $ne: id } }, { $inc: { position: 1 } })
-            res.send({ shift, incre })
+            await todo.updateMany({ position: { $lt: prePosition, $gte: curPosition }, _id: { $ne: id } }, { $inc: { position: 1 } })
         } else {
             const desc = await todo.updateMany({ position: { $lte: curPosition, $gt: prePosition }, _id: { $ne: id } }, { $inc: { position: -1 } })
-
-            res.send({ shift, desc })
         }
+        const docs = await todo.find().sort({ position: -1 })
+        res.send(docs);
+
     } catch (error) {
         handleError(res, error);
     }
@@ -51,8 +51,11 @@ router.patch('/status/:id', async (req, res) => {
     try {
 
         const isCompleted = req.body.isCompleted
-        doc = await todo.findByIdAndUpdate(req.params.id, { $set: { isCompleted } })
-        res.send(doc)
+        await todo.findByIdAndUpdate(req.params.id, { $set: { isCompleted } })
+
+        const docs = await todo.find().sort({ position: -1 })
+        res.send(docs);
+
 
     } catch (error) {
         handleError(res, error);
